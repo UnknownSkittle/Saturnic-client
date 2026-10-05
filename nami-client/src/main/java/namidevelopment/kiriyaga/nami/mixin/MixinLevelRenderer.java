@@ -28,6 +28,12 @@ import static namidevelopment.kiriyaga.api.NamiApi.*;
 @Mixin(LevelRenderer.class)
 public abstract class MixinLevelRenderer {
     @Unique
+    private Camera saturnic$renderCamera;
+
+    @Unique
+    private float saturnic$tickDelta;
+
+    @Unique
     private Matrix4f saturnic$positionMatrix;
 
     @Unique
@@ -38,7 +44,9 @@ public abstract class MixinLevelRenderer {
 
     @Inject(method = "finalizeGizmoCollection()V", at = @At("HEAD"))
     private void onRenderTail(CallbackInfo ci) {
-        Camera camera = MC.gameRenderer.getMainCamera();
+        Camera camera = saturnic$renderCamera;
+        if (camera == null)
+            return;
         PoseStack matrices = new PoseStack();
         matrices.pushPose();
         matrices.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
@@ -47,7 +55,7 @@ public abstract class MixinLevelRenderer {
         try (Gizmos.TemporaryCollection ignored = collectPerFrameGizmos()) {
             EVENT_SERVICE.post(new Render3DEvent(
                     matrices,
-                    MC.getDeltaTracker().getGameTimeDeltaPartialTick(true),
+                    saturnic$tickDelta,
                     camera,
                     saturnic$positionMatrix,
                     saturnic$projectionMatrix
@@ -59,6 +67,8 @@ public abstract class MixinLevelRenderer {
 
     @Inject(method = "renderLevel", at = @At("HEAD"))
     private void captureMatrices(GraphicsResourceAllocator objectAllocator, DeltaTracker renderTickCounter, boolean bl, Camera camera, Matrix4f matrix4f, Matrix4f matrix4f2, Matrix4f matrix4f3, GpuBufferSlice gpuBufferSlice, Vector4f vector4f, boolean bl2, CallbackInfo ci) {
+        saturnic$renderCamera = camera;
+        saturnic$tickDelta = renderTickCounter.getGameTimeDeltaPartialTick(true);
         saturnic$positionMatrix = new Matrix4f(matrix4f3);
         saturnic$projectionMatrix = new Matrix4f(matrix4f);
         RenderUtil.PROJECTION_MATRIX.set(new Matrix4f(matrix4f2));

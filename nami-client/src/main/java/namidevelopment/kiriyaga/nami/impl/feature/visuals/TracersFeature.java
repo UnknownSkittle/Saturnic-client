@@ -2,7 +2,7 @@ package namidevelopment.kiriyaga.nami.impl.feature.visuals;
 
 import namidevelopment.kiriyaga.api.annotation.RegisterFeature;
 import namidevelopment.kiriyaga.api.annotation.SubscribeEvent;
-import namidevelopment.kiriyaga.api.event.impl.Render3DEvent;
+import namidevelopment.kiriyaga.api.event.impl.Render2DEvent;
 import namidevelopment.kiriyaga.api.model.feature.Feature;
 import namidevelopment.kiriyaga.api.model.feature.FeatureCategory;
 import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
@@ -11,6 +11,7 @@ import namidevelopment.kiriyaga.api.util.BlockUtils;
 import namidevelopment.kiriyaga.api.util.ColorUtils;
 import namidevelopment.kiriyaga.api.util.entity.EntityUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
+import net.minecraft.client.gui.GuiGraphics;
 import namidevelopment.kiriyaga.nami.impl.feature.client.ColorFeature;
 import namidevelopment.kiriyaga.nami.impl.feature.visuals.blocksearch.BlockSearchFeature;
 import net.minecraft.core.BlockPos;
@@ -38,7 +39,7 @@ public class TracersFeature extends Feature {
     }
 
     @SubscribeEvent
-    public void onRender(Render3DEvent event) {
+    public void onRender(Render2DEvent event) {
         if (MC.level == null || MC.player == null)
             return;
 
@@ -72,20 +73,29 @@ public class TracersFeature extends Feature {
             }
         }
 
-        Vec3 origin = event.getCamera().position().add(event.getCamera().getNearPlane().getPointOnPlane(0, 0));
         double maxDistanceSqr = range.get() * range.get();
+        GuiGraphics graphics = event.getDrawContext();
+        float partialTick = event.getRenderTickCounter().getGameTimeDeltaPartialTick(true);
+        float screenCenterX = graphics.guiWidth() * 0.5f;
+        float screenCenterY = graphics.guiHeight() * 0.5f;
         for (Map.Entry<Entity, Color> target : targets.entrySet()) {
             Entity entity = target.getKey();
             if (entity.isRemoved() || !entity.isAlive())
                 continue;
 
-            Vec3 interpolatedPosition = EntityUtils.getRenderPos(entity, event.getTickDelta());
+            Vec3 interpolatedPosition = EntityUtils.getRenderPos(entity, partialTick);
             Vec3 position = entity.getBoundingBox()
                     .move(interpolatedPosition.subtract(entity.position()))
                     .getCenter();
             if (MC.player.distanceToSqr(position) > maxDistanceSqr)
                 continue;
-            RenderUtil.drawLine(origin, position, target.getValue(), 1.5f);
+            Vec3 projected = RenderUtil.project(position);
+            if (!RenderUtil.projectionVisible(projected)
+                    || projected.x < 0 || projected.x > graphics.guiWidth()
+                    || projected.y < 0 || projected.y > graphics.guiHeight())
+                continue;
+            drawScreenLine(graphics, screenCenterX, screenCenterY,
+                    (float) projected.x, (float) projected.y, target.getValue());
         }
 
         if (blockSearchTargets.get()) {
@@ -99,9 +109,32 @@ public class TracersFeature extends Feature {
                     if (MC.player.distanceToSqr(center) > maxDistanceSqr)
                         continue;
                     Color color = BlockUtils.getColorByBlockId(MC.level.getBlockState(pos));
-                    RenderUtil.drawLine(origin, center, color, 1.5f);
+                    Vec3 projected = RenderUtil.project(center);
+                    if (!RenderUtil.projectionVisible(projected)
+                            || projected.x < 0 || projected.x > graphics.guiWidth()
+                            || projected.y < 0 || projected.y > graphics.guiHeight())
+                        continue;
+                    drawScreenLine(graphics, screenCenterX, screenCenterY,
+                            (float) projected.x, (float) projected.y, color);
                 }
             }
         }
+    }
+
+    private void drawScreenLine(GuiGraphics graphics, float startX, float startY,
+                                float endX, float endY, Color color) {
+        float deltaX = endX - startX;
+        float deltaY = endY - startY;
+        float length = (float) Math.hypot(deltaX, deltaY);
+        if (length < 1)
+            return;
+
+        var pose = graphics.pose();
+        pose.pushMatrix();
+        pose.translate((startX + endX) * 0.5f, (startY + endY) * 0.5f);
+        pose.rotate((float) Math.atan2(deltaY, deltaX));
+        graphics.fill((int) -Math.ceil(length * 0.5f), -1,
+                (int) Math.ceil(length * 0.5f), 1, color.getRGB());
+        pose.popMatrix();
     }
 }
