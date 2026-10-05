@@ -78,6 +78,21 @@ The default command prefix is `-`.
 - Minecraft 1.21.11 
 - Fabric loader, API
 
+## Platform compatibility
+
+The client is Java code and does not bundle architecture-specific native libraries. Its runtime compatibility therefore depends on the Java, Minecraft launcher, and LWJGL/Fabric installation available on the target system:
+
+- 64-bit x86 (x86_64) is the expected desktop target. 32-bit x86 is not supported by the Minecraft 1.21.11 runtime.
+- AArch64/ARM64 can work when a compatible Java 21 and Minecraft/LWJGL runtime are available; it is not independently packaged or tested here.
+- Linux with Xorg or Wayland relies on the display backend selected and supported by the installed LWJGL/GLFW runtime.
+- BSD is not an officially verified target. It requires a compatible Java 21 runtime and a Minecraft/LWJGL distribution that supports the specific BSD system.
+
+No source-level OS or CPU checks are used by the client itself. These notes describe runtime dependencies, not tested platform guarantees.
+
+## Player location intel
+
+Enable logging with `-intel start` and stop it with `-intel stop`. While enabled, the client records nearby player sightings and visit density locally in `Saturnic/player-intel.json` under the Minecraft game directory, separated by server and dimension. View recent player coordinates with `-intel players`. Add a base marker at your current position with `-intel base <name>`, remove it with `-intel remove <name>`, and list saved markers with `-intel list`. Open the top-down heatmap with `-intel map`. Replace `-` with the configured command prefix if it has been changed.
+
 ---
 
 ## How to Build

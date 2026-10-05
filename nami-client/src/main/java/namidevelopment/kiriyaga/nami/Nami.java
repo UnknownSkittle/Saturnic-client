@@ -3,6 +3,7 @@ package namidevelopment.kiriyaga.nami;
 import namidevelopment.kiriyaga.nami.contract.ClientFeatureContracts;
 import namidevelopment.kiriyaga.nami.impl.gui.component.NavigatePanelComponent;
 import namidevelopment.kiriyaga.nami.impl.gui.screen.*;
+import namidevelopment.kiriyaga.nami.impl.feature.visuals.PlayerIntelFeature;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
@@ -76,6 +77,7 @@ public class Nami implements ClientModInitializer {
         });
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
+            FEATURE_SERVICE.getStorage().getByClass(PlayerIntelFeature.class).saveData();
             CONFIG_SERVICE.saveFeatures();
             CONFIG_SERVICE.saveMacros();
             CONFIG_SERVICE.savePluginsState();
