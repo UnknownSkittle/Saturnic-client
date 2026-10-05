@@ -8,7 +8,7 @@
   "contact": {
     "sources": "https://github.com/Unknown_Skittle/Saturnic"
   },
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "environment": "*",
   "entrypoints": {
     "client": [

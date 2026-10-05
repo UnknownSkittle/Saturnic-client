@@ -3,6 +3,7 @@ package namidevelopment.kiriyaga.nami.impl.gui.component.panel.settings;
 import namidevelopment.kiriyaga.api.model.setting.KeyBindSetting;
 import namidevelopment.kiriyaga.api.util.KeyUtils;
 import namidevelopment.kiriyaga.nami.impl.feature.client.ColorFeature;
+import namidevelopment.kiriyaga.nami.impl.feature.client.ClickGuiFeature;
 import namidevelopment.kiriyaga.nami.impl.gui.base.BasePanel;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -45,6 +46,11 @@ public class KeyBindSettingPanel extends BasePanel {
         if (!isHovered(mouseX, mouseY)) return false;
 
         if (waitingForKeyBind == setting) {
+            if (isRequiredKeyboardBind() && !ClickGuiFeature.isKeyboardKey(button)) {
+                waitingForKeyBind.set(ClickGuiFeature.getDefaultOpenKey());
+                waitingForKeyBind = null;
+                return true;
+            }
             waitingForKeyBind.set(button);
             waitingForKeyBind = null;
             return true;
@@ -65,13 +71,24 @@ public class KeyBindSettingPanel extends BasePanel {
     @Override
     public void keyPressed(int keyCode) {
         if (waitingForKeyBind != null) {
-            if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            if (isRequiredKeyboardBind()) {
+                if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_ESCAPE
+                        || !ClickGuiFeature.isKeyboardKey(keyCode)) {
+                    waitingForKeyBind.set(ClickGuiFeature.getDefaultOpenKey());
+                } else {
+                    waitingForKeyBind.set(keyCode);
+                }
+            } else if (keyCode == GLFW.GLFW_KEY_DELETE || keyCode == GLFW.GLFW_KEY_ESCAPE) {
                 waitingForKeyBind.set(-1);
             } else {
                 waitingForKeyBind.set(keyCode);
             }
             waitingForKeyBind = null;
         }
+    }
+
+    private boolean isRequiredKeyboardBind() {
+        return setting.getParentFeature() instanceof ClickGuiFeature;
     }
 
     @Override

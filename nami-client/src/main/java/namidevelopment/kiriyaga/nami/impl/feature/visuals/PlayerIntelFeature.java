@@ -62,6 +62,8 @@ public class PlayerIntelFeature extends Feature {
             return;
         }
 
+        recordHeatCell(world, MC.player.blockPosition().getX(), MC.player.blockPosition().getZ(), now);
+
         for (Player player : MC.level.players()) {
             if (player == MC.player || player.isRemoved()) {
                 continue;
@@ -92,12 +94,7 @@ public class PlayerIntelFeature extends Feature {
                 previous.z = z;
             }
 
-            HeatCell heatCell = world.heat.computeIfAbsent(cellKey, ignored -> new HeatCell(cellX, cellZ));
-            if (now - heatCell.lastVisit >= HEAT_INTERVAL_MILLIS) {
-                heatCell.visits++;
-                heatCell.lastVisit = now;
-                dirty = true;
-            }
+            recordHeatCell(world, x, z, now);
         }
 
         if (dirty && now - lastSaveMillis >= SAVE_INTERVAL_MILLIS) {
@@ -176,6 +173,18 @@ public class PlayerIntelFeature extends Feature {
 
     private static String cellKey(int cellX, int cellZ) {
         return cellX + "," + cellZ;
+    }
+
+    private void recordHeatCell(WorldIntel world, int x, int z, long now) {
+        int cellX = Math.floorDiv(x, HEAT_CELL_SIZE);
+        int cellZ = Math.floorDiv(z, HEAT_CELL_SIZE);
+        HeatCell heatCell = world.heat.computeIfAbsent(
+                cellKey(cellX, cellZ), ignored -> new HeatCell(cellX, cellZ));
+        if (now - heatCell.lastVisit >= HEAT_INTERVAL_MILLIS) {
+            heatCell.visits++;
+            heatCell.lastVisit = now;
+            dirty = true;
+        }
     }
 
     public static class WorldIntel {

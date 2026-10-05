@@ -46,6 +46,7 @@ public class KeyBindSetting extends Setting<Integer> {
     @Override
     public void set(Integer value) {
         this.value = value;
+        notifyChanged();
     }
 
     @Override
@@ -61,12 +62,12 @@ public class KeyBindSetting extends Setting<Integer> {
         if (json.isJsonObject()) {
             JsonObject obj = json.getAsJsonObject();
 
-            this.value = obj.has("value") ? obj.get("value").getAsInt() : super.value;
+            set(obj.has("value") ? obj.get("value").getAsInt() : super.value);
 
             this.holdMode = obj.has("holdMode") && obj.get("holdMode").getAsBoolean();
 
         } else {
-            this.value = super.value;
+            set(super.value);
             this.holdMode = false;
         }
     }

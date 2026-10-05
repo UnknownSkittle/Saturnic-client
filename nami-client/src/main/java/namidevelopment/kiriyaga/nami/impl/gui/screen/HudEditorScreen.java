@@ -4,6 +4,7 @@ import namidevelopment.kiriyaga.api.model.feature.Feature;
 import namidevelopment.kiriyaga.api.model.feature.FeatureCategory;
 import namidevelopment.kiriyaga.api.model.feature.HudElementFeature;
 import namidevelopment.kiriyaga.nami.impl.feature.client.ClickGuiFeature;
+import namidevelopment.kiriyaga.nami.impl.feature.hud.IntelMinimapFeature;
 import namidevelopment.kiriyaga.nami.impl.gui.base.NamiScreen;
 import namidevelopment.kiriyaga.nami.impl.gui.component.panel.CategoryPanel;
 import namidevelopment.kiriyaga.nami.impl.gui.component.panel.FeaturePanel;
@@ -124,6 +125,9 @@ public class HudEditorScreen extends NamiScreen {
             }
 
             hud.renderItems(context);
+            if (hud instanceof IntelMinimapFeature minimap) {
+                minimap.renderMinimap(context);
+            }
         }
     }
 

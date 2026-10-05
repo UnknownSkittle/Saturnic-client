@@ -1,111 +1,113 @@
 package namidevelopment.kiriyaga.nami.impl.gui.screen;
 
 import namidevelopment.kiriyaga.nami.impl.feature.visuals.PlayerIntelFeature;
+import namidevelopment.kiriyaga.nami.impl.gui.IntelMapRenderer;
 import namidevelopment.kiriyaga.nami.impl.gui.base.NamiScreen;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+
+import java.awt.Rectangle;
 
 import static namidevelopment.kiriyaga.api.NamiApi.MC;
 
 public class LocationMapScreen extends NamiScreen {
-    private static final int MAP_RANGE = 128;
     private final PlayerIntelFeature intelFeature;
+    private double centerX;
+    private double centerZ;
+    private double radius = 256;
+    private boolean dragging;
+    private Rectangle mapBounds = new Rectangle();
 
     public LocationMapScreen(PlayerIntelFeature intelFeature) {
         super(Component.literal("Player location heatmap"));
         this.intelFeature = intelFeature;
+        recenter();
+    }
+
+    @Override
+    protected void init() {
+        addRenderableWidget(Button.builder(Component.literal("Recenter"), button -> recenter())
+                .bounds(width - 104, 10, 92, 20)
+                .build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float delta) {
         graphics.fill(0, 0, width, height, 0xE611151B);
-        graphics.drawCenteredString(font, "Player Intel Heatmap", width / 2, 14, 0xFFFFFFFF);
+        graphics.drawString(font, "Player Intel Map", 14, 15, 0xFFFFFFFF);
+        graphics.drawString(font, String.format("Center: %.0f, %.0f   View radius: %.0f blocks",
+                centerX, centerZ, radius), 14, 31, 0xFFB8C6C9);
 
-        int size = Math.max(120, Math.min(Math.min(width - 48, height - 100), 440));
-        int left = (width - size) / 2;
-        int top = (height - size) / 2;
-        int centerX = MC.player == null ? 0 : MC.player.blockPosition().getX();
-        int centerZ = MC.player == null ? 0 : MC.player.blockPosition().getZ();
-        float scale = (float) size / (MAP_RANGE * 2);
-
-        graphics.fill(left, top, left + size, top + size, 0xFF202A2D);
-        drawGrid(graphics, left, top, size);
+        int availableSize = Math.max(1, Math.min(width - 32, height - 100));
+        int mapSize = Math.max(1, Math.min(availableSize, 1000));
+        int left = (width - mapSize) / 2;
+        int top = 58 + Math.max(0, (height - 100 - mapSize) / 2);
+        mapBounds = new Rectangle(left, top, mapSize, mapSize);
 
         PlayerIntelFeature.WorldIntel world = intelFeature.getCurrentWorldIntel();
-        if (world != null) {
-            for (PlayerIntelFeature.HeatCell cell : world.heat.values()) {
-                float worldX = cell.cellX * PlayerIntelFeature.HEAT_CELL_SIZE
-                        + PlayerIntelFeature.HEAT_CELL_SIZE / 2.0f;
-                float worldZ = cell.cellZ * PlayerIntelFeature.HEAT_CELL_SIZE
-                        + PlayerIntelFeature.HEAT_CELL_SIZE / 2.0f;
-                int mapX = left + size / 2 + Math.round((worldX - centerX) * scale);
-                int mapY = top + size / 2 + Math.round((worldZ - centerZ) * scale);
-                int cellSize = Math.max(2, Math.round(PlayerIntelFeature.HEAT_CELL_SIZE * scale));
-                if (inside(mapX, mapY, left, top, size)) {
-                    graphics.fill(mapX - cellSize / 2, mapY - cellSize / 2,
-                            mapX + cellSize / 2, mapY + cellSize / 2, heatColor(cell.visits));
-                }
-            }
+        boolean hasPlayer = MC.player != null;
+        double playerX = hasPlayer ? MC.player.getX() : 0;
+        double playerZ = hasPlayer ? MC.player.getZ() : 0;
+        IntelMapRenderer.drawMap(graphics, font, world, mapBounds, centerX, centerZ, radius,
+                hasPlayer, playerX, playerZ, true);
 
-            drawPlayerSightings(graphics, world, left, top, size, centerX, centerZ, scale);
-            drawBases(graphics, world, left, top, size, centerX, centerZ, scale);
+        graphics.drawString(font, "Scroll: zoom   Drag: pan   Cyan: you   Red: player sightings   Green: bases",
+                14, height - 28, 0xFFD4DEDF);
+        graphics.drawString(font, "Heat fades with age; visit density is sampled locally.   Esc: close",
+                14, height - 15, 0xFF9EABAE);
+        super.render(graphics, mouseX, mouseY, delta);
+    }
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (event.button() == 0 && mapBounds.contains(event.x(), event.y())) {
+            dragging = true;
+            return true;
         }
-
-        int centerScreenX = left + size / 2;
-        int centerScreenY = top + size / 2;
-        graphics.fill(centerScreenX - 3, centerScreenY - 3, centerScreenX + 4, centerScreenY + 4, 0xFF60C8FF);
-        graphics.drawCenteredString(font, "You", centerScreenX, centerScreenY + 7, 0xFFBFEAFF);
-        graphics.drawCenteredString(font, "Use intel base/remove commands to manage markers   |   Esc: close",
-                width / 2, height - 26, 0xFFCCCCCC);
+        return super.mouseClicked(event, doubleClick);
     }
 
-    private void drawPlayerSightings(GuiGraphics graphics, PlayerIntelFeature.WorldIntel world,
-                                     int left, int top, int size, int centerX, int centerZ, float scale) {
-        world.players.forEach((name, history) -> {
-            if (history == null || history.latest() == null) {
-                return;
-            }
-            PlayerIntelFeature.PlayerSighting sighting = history.latest();
-            int x = left + size / 2 + Math.round((sighting.x - centerX) * scale);
-            int y = top + size / 2 + Math.round((sighting.z - centerZ) * scale);
-            if (inside(x, y, left, top, size)) {
-                graphics.fill(x - 2, y - 2, x + 3, y + 3, 0xFFFF6B6B);
-                graphics.drawString(font, name, x + 4, y - 4, 0xFFFFD6D6, true);
-            }
-        });
-    }
-
-    private void drawBases(GuiGraphics graphics, PlayerIntelFeature.WorldIntel world,
-                           int left, int top, int size, int centerX, int centerZ, float scale) {
-        for (PlayerIntelFeature.BaseMarker base : world.bases.values()) {
-            int x = left + size / 2 + Math.round((base.x - centerX) * scale);
-            int y = top + size / 2 + Math.round((base.z - centerZ) * scale);
-            if (inside(x, y, left, top, size)) {
-                graphics.fill(x - 3, y - 3, x + 4, y + 4, 0xFF65E58B);
-                graphics.drawString(font, base.name, x + 5, y - 4, 0xFFD8FFE3, true);
-            }
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        if (dragging && event.button() == 0) {
+            double scale = mapBounds.width / (radius * 2.0);
+            centerX -= deltaX / scale;
+            centerZ -= deltaY / scale;
+            return true;
         }
+        return super.mouseDragged(event, deltaX, deltaY);
     }
 
-    private void drawGrid(GuiGraphics graphics, int left, int top, int size) {
-        int gridStep = Math.max(1, size / 8);
-        for (int offset = gridStep; offset < size; offset += gridStep) {
-            graphics.fill(left + offset, top, left + offset + 1, top + size, 0x403C494B);
-            graphics.fill(left, top + offset, left + size, top + offset + 1, 0x403C494B);
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        if (event.button() == 0) dragging = false;
+        return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        if (!mapBounds.contains(mouseX, mouseY)) return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+
+        double oldScale = mapBounds.width / (radius * 2.0);
+        double worldXUnderCursor = centerX + (mouseX - mapBounds.getCenterX()) / oldScale;
+        double worldZUnderCursor = centerZ + (mouseY - mapBounds.getCenterY()) / oldScale;
+        radius = Math.max(16, Math.min(8192, radius * (verticalAmount > 0 ? 0.8 : 1.25)));
+        double newScale = mapBounds.width / (radius * 2.0);
+        centerX = worldXUnderCursor - (mouseX - mapBounds.getCenterX()) / newScale;
+        centerZ = worldZUnderCursor - (mouseY - mapBounds.getCenterY()) / newScale;
+        return true;
+    }
+
+    private void recenter() {
+        if (MC.player != null) {
+            centerX = MC.player.getX();
+            centerZ = MC.player.getZ();
+        } else {
+            centerX = 0;
+            centerZ = 0;
         }
-    }
-
-    private boolean inside(int x, int y, int left, int top, int size) {
-        return x >= left && x < left + size && y >= top && y < top + size;
-    }
-
-    private int heatColor(int visits) {
-        float intensity = Math.min(1.0f, (float) Math.log1p(visits) / (float) Math.log(16));
-        int red = 255;
-        int green = Math.round(210 * (1.0f - intensity));
-        int blue = Math.round(45 * (1.0f - intensity));
-        int alpha = Math.round(70 + 150 * intensity);
-        return alpha << 24 | red << 16 | green << 8 | blue;
     }
 
     @Override

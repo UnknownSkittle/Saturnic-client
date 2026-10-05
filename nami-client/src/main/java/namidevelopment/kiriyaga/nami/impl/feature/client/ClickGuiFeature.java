@@ -6,11 +6,13 @@ import namidevelopment.kiriyaga.api.annotation.RegisterFeature;
 import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
 import namidevelopment.kiriyaga.api.model.setting.DoubleSetting;
 import namidevelopment.kiriyaga.api.model.setting.IntSetting;
+import org.lwjgl.glfw.GLFW;
 
 import static namidevelopment.kiriyaga.nami.Nami.*;
 import static namidevelopment.kiriyaga.api.NamiApi.*;
 @RegisterFeature
 public class ClickGuiFeature extends Feature {
+    private static final int DEFAULT_OPEN_KEY = GLFW.GLFW_KEY_P;
 
     public final DoubleSetting scale = addSetting(new DoubleSetting("Scale", 1.00, 0.50, 1.50));
     public final BoolSetting lines = addSetting(new BoolSetting("Lines", true));
@@ -23,7 +25,22 @@ public class ClickGuiFeature extends Feature {
 
     public ClickGuiFeature() {
         super("ClickGui", "Opens client UI.", FeatureCategory.of("Client"), "clickgui","click", "gui", "menu", "clckgui");
-        this.keyBind.set(80);
+        this.keyBind.set(DEFAULT_OPEN_KEY);
+        this.keyBind.setOnChanged(this::ensureKeyboardKeyBind);
+    }
+
+    public void ensureKeyboardKeyBind() {
+        if (!isKeyboardKey(this.keyBind.get())) {
+            this.keyBind.set(DEFAULT_OPEN_KEY);
+        }
+    }
+
+    public static int getDefaultOpenKey() {
+        return DEFAULT_OPEN_KEY;
+    }
+
+    public static boolean isKeyboardKey(int key) {
+        return key >= GLFW.GLFW_KEY_SPACE && key <= GLFW.GLFW_KEY_MENU;
     }
 
     @Override

@@ -35,7 +35,11 @@ public class HelpCommand extends Command {
 
         String displayText = cmds.stream().filter(c -> c.getName() != null).map(this::getDisplay).collect(Collectors.joining(", "));
 
-        MutableComponent message = CAT_FORMAT.format("{gray}Available commands: " + displayText + "{white}.");
+        MutableComponent message = CAT_FORMAT.format(
+                "{gray}Saturnic help — type {global}?" + "saturnic{gray} in chat at any time. "
+                        + "The ClickGUI opens with {global}P{gray} by default (also assignable under Client > ClickGui). "
+                        + "Command prefix: {global}" + COMMAND_SERVICE.getExecutor().getPrefix()
+                        + "{gray}. Available commands: " + displayText + "{white}.");
         CHAT_SERVICE.sendPersistent(this.getName(), message);
     }
 

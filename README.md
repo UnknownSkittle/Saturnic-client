@@ -3,7 +3,7 @@
 This is the Saturnic client for Minecraft 1.21.11.
 It does not currently receive automated updates.
 
-### Join our discord - https://discord.gg/auHTtNAqRq
+### Join our discord - https://discord.gg/fkvKDz57Ku
 
 <p>
   <a href="https://github.com/Unknown_Skittle/Saturnic/releases">
@@ -15,8 +15,8 @@ It does not currently receive automated updates.
   <a href="https://github.com/Unknown_Skittle/Saturnic/releases">
     <img src="https://img.shields.io/github/v/release/Unknown_Skittle/Saturnic?color=blue&label=Latest%20Release" alt="Latest Release" />
   </a>
-  <a href="https://discord.gg/auHTtNAqRq">
-    <img src="https://img.shields.io/discord/1298742596633497744?color=7289DB&label=Discord" alt="Discord" />
+  <a href="https://discord.gg/fkvKDz57Ku">
+    <img src="https://img.shields.io/discord/1510696235013771407?color=7289DB&label=Discord" alt="Discord" />
   </a>
 </p>
 
@@ -58,7 +58,7 @@ See https://github.com/Unknown_Skittle/Saturnic for information
 <details>
 <summary>How to open ClickGUI?</summary>
 
-Default keybind is: P  
+Default keybind is `P`. The keybind must remain a keyboard key; clearing it or loading an old config with no key restores `P`. Type `?saturnic` in chat to see help regardless of the configured command prefix.
 
 </details>
 
@@ -91,7 +91,7 @@ No source-level OS or CPU checks are used by the client itself. These notes desc
 
 ## Player location intel
 
-Enable logging with `-intel start` and stop it with `-intel stop`. While enabled, the client records nearby player sightings and visit density locally in `Saturnic/player-intel.json` under the Minecraft game directory, separated by server and dimension. View recent player coordinates with `-intel players`. Add a base marker at your current position with `-intel base <name>`, remove it with `-intel remove <name>`, and list saved markers with `-intel list`. Open the top-down heatmap with `-intel map`. Replace `-` with the configured command prefix if it has been changed.
+Enable logging with `-intel start` and stop it with `-intel stop`. While enabled, the client records nearby player sightings and your own visited areas locally in `Saturnic/player-intel.json` under the Minecraft game directory, separated by server and dimension. Toggle the `IntelMinimap` HUD feature for a movable, configurable minimap; assign its `OpenMap` setting to a key to open the interactive fullscreen map. The full map supports mouse-wheel zoom, drag panning, and recentering. Heat shows recent visit density and fades with age; player sightings and saved bases use separate markers. View recent player coordinates with `-intel players`. Add a base marker at your current position with `-intel base <name>`, remove it with `-intel remove <name>`, and list saved markers with `-intel list`. Open the fullscreen map directly with `-intel map`. Replace `-` with the configured command prefix if it has been changed.
 
 ## Added features
 
@@ -123,7 +123,7 @@ The client JAR includes the `saturnic-api` dependency.
 
 ## License
 
-This project is licensed under the MIT License. You are free to contribute, distribute, fork, or reuse any part.
+This project is licensed under the GNU General Public License v3.0 only. See [LICENSE](./LICENSE). Third-party components retain their original license terms as identified in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).
 
 ---
 

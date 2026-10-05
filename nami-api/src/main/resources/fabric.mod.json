@@ -6,7 +6,7 @@
   "name": "Saturnic API",
   "description": "The API for the Saturnic client.",
   "authors": ["Unknown_Skittle"],
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "environment": "*",
   "entrypoints": {
     "client": [

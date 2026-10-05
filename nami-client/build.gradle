@@ -30,6 +30,8 @@ processResources {
     inputs.property "version", project.version
     inputs.property "loader_version", project.loader_version
     inputs.property "minecraft_version", project.minecraft_version
+    from("LICENSE")
+    from(rootProject.file("THIRD_PARTY_NOTICES.md"))
 
     filesMatching("fabric.mod.json") {expand(
                 version: project.version,

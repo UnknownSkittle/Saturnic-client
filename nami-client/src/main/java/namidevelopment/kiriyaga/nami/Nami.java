@@ -66,6 +66,9 @@ public class Nami implements ClientModInitializer {
             CONFIG_SERVICE.loadPluginsState();
 
             CONFIG_SERVICE.loadFeatures();
+            FEATURE_SERVICE.getStorage().getByClass(
+                    namidevelopment.kiriyaga.nami.impl.feature.client.ClickGuiFeature.class)
+                    .ensureKeyboardKeyBind();
             CONFIG_SERVICE.loadSocials();
 
             if (CONFIG_SERVICE.loadName() == null)

@@ -22,6 +22,7 @@ processResources {
     inputs.property "version", project.version
     inputs.property "loader_version", project.loader_version
     inputs.property "minecraft_version", project.minecraft_version
+    from("LICENSE.txt")
 
     filesMatching("fabric.mod.json") {
         expand(

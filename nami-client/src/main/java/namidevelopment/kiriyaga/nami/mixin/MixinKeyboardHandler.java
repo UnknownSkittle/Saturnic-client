@@ -42,6 +42,7 @@ public abstract class MixinKeyboardHandler {
 
         ClickGuiFeature clickGui = FEATURE_SERVICE.getStorage().getByClass(ClickGuiFeature.class);
         if (clickGui == null) return;
+        clickGui.ensureKeyboardKeyBind();
 
         KeyBindSetting bind = clickGui.getKeyBind();
         if (bind == null) return;

@@ -23,6 +23,19 @@ public class CommandExecutor {
     @SubscribeEvent
     public void onChatMessage(ChatMessageEvent event) {
         String message = event.getMessage();
+        String normalizedMessage = message.trim();
+        if (normalizedMessage.equalsIgnoreCase("?saturnic")
+                || normalizedMessage.equalsIgnoreCase("?saturnic help")) {
+            event.setCancelled(true);
+            try {
+                suggester.getDispatcher().execute("help", new CommandSource());
+            } catch (Exception e) {
+                CHAT_SERVICE.sendPersistent("CommandExecutor",
+                        CAT_FORMAT.format("{red}Unable to display Saturnic help: " + e.getMessage()));
+            }
+            return;
+        }
+
         if (!message.startsWith(prefix)) return;
 
         event.setCancelled(true);

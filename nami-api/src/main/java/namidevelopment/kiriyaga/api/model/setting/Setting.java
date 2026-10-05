@@ -39,6 +39,10 @@ public abstract class Setting<T> {
 
     public void set(T value) {
         this.value = value;
+        notifyChanged();
+    }
+
+    protected final void notifyChanged() {
         if (onChanged != null) onChanged.run();
     }
 
