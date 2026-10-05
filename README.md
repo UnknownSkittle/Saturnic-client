@@ -95,7 +95,7 @@ Enable logging with `-intel start` and stop it with `-intel stop`. While enabled
 
 ## Added features
 
-The client includes configurable Flight, NoFall, and ClickTP movement features; Aura can optionally attack multiple targets. The separate Tracers feature draws 2D lines from the screen-center crosshair to selected ESP, EntitySearch, ItemSearch, and BlockSearch targets, with a configurable range. StorageESP highlights storage blocks in loaded chunks and BaseFinder marks dense storage-block clusters as possible bases. Chest screens include Loot and Store buttons for quick-moving items, and ChestStealer can transfer chest contents with a configurable delay. These features are subject to server rules and server-side movement or interaction checks.
+The client includes configurable Flight, NoFall, and ClickTP movement features; Aura can optionally attack multiple targets. The separate Tracers feature draws 2D lines from the screen-center crosshair to selected ESP, EntitySearch, ItemSearch, and BlockSearch targets, with configurable range and line thickness. Targets outside the view and behind the camera are indicated at the screen edge; Freecam also draws a rainbow tracer to the player. StorageESP highlights storage blocks in loaded chunks and BaseFinder marks dense storage-block clusters as possible bases. Chest screens include Loot and Store buttons for quick-moving items, and ChestStealer can transfer chest contents with a configurable delay. These features are subject to server rules and server-side movement or interaction checks.
 
 ---
 

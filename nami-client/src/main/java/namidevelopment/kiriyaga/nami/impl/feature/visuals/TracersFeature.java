@@ -11,6 +11,7 @@ import namidevelopment.kiriyaga.api.util.BlockUtils;
 import namidevelopment.kiriyaga.api.util.ColorUtils;
 import namidevelopment.kiriyaga.api.util.entity.EntityUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
+import net.minecraft.client.Camera;
 import net.minecraft.client.gui.GuiGraphics;
 import namidevelopment.kiriyaga.nami.impl.feature.client.ColorFeature;
 import namidevelopment.kiriyaga.nami.impl.feature.visuals.blocksearch.BlockSearchFeature;
@@ -33,6 +34,7 @@ public class TracersFeature extends Feature {
     public final BoolSetting itemSearchTargets = addSetting(new BoolSetting("ItemSearch", false));
     public final BoolSetting blockSearchTargets = addSetting(new BoolSetting("BlockSearch", false));
     public final DoubleSetting range = addSetting(new DoubleSetting("Range", 128, 16, 512));
+    public final DoubleSetting thickness = addSetting(new DoubleSetting("Thickness", 1.0, 1.0, 5.0));
 
     public TracersFeature() {
         super("Tracers", "Draws view-aligned lines to selected ESP and search targets.", FeatureCategory.of("Render"), "tracer");
@@ -89,13 +91,26 @@ public class TracersFeature extends Feature {
                     .getCenter();
             if (MC.player.distanceToSqr(position) > maxDistanceSqr)
                 continue;
-            Vec3 projected = RenderUtil.project(position);
-            if (!RenderUtil.projectionVisible(projected)
-                    || projected.x < 0 || projected.x > graphics.guiWidth()
-                    || projected.y < 0 || projected.y > graphics.guiHeight())
+            float[] endpoint = getScreenEndpoint(position, graphics, screenCenterX, screenCenterY);
+            if (endpoint == null)
                 continue;
             drawScreenLine(graphics, screenCenterX, screenCenterY,
-                    (float) projected.x, (float) projected.y, target.getValue());
+                    endpoint[0], endpoint[1], target.getValue());
+        }
+
+        FreecamFeature freecam = FEATURE_SERVICE.getStorage().getByClass(FreecamFeature.class);
+        if (freecam != null && freecam.isEnabled()) {
+            Vec3 playerPosition = EntityUtils.getRenderPos(MC.player, partialTick);
+            Vec3 playerCenter = MC.player.getBoundingBox()
+                    .move(playerPosition.subtract(MC.player.position()))
+                    .getCenter();
+            float[] endpoint = getScreenEndpoint(playerCenter, graphics, screenCenterX, screenCenterY);
+            if (endpoint != null) {
+                float hue = (System.currentTimeMillis() % 4000L) / 4000.0f;
+                Color rainbow = Color.getHSBColor(hue, 1.0f, 1.0f);
+                drawScreenLine(graphics, screenCenterX, screenCenterY,
+                        endpoint[0], endpoint[1], rainbow);
+            }
         }
 
         if (blockSearchTargets.get()) {
@@ -109,16 +124,62 @@ public class TracersFeature extends Feature {
                     if (MC.player.distanceToSqr(center) > maxDistanceSqr)
                         continue;
                     Color color = BlockUtils.getColorByBlockId(MC.level.getBlockState(pos));
-                    Vec3 projected = RenderUtil.project(center);
-                    if (!RenderUtil.projectionVisible(projected)
-                            || projected.x < 0 || projected.x > graphics.guiWidth()
-                            || projected.y < 0 || projected.y > graphics.guiHeight())
+                    float[] endpoint = getScreenEndpoint(center, graphics, screenCenterX, screenCenterY);
+                    if (endpoint == null)
                         continue;
                     drawScreenLine(graphics, screenCenterX, screenCenterY,
-                            (float) projected.x, (float) projected.y, color);
+                            endpoint[0], endpoint[1], color);
                 }
             }
         }
+    }
+
+    private float[] getScreenEndpoint(Vec3 worldPosition, GuiGraphics graphics,
+                                      float centerX, float centerY) {
+        Camera camera = MC.gameRenderer.getMainCamera();
+        Vec3 cameraOffset = worldPosition.subtract(camera.position());
+        double depth = cameraOffset.dot(new Vec3(camera.forwardVector()));
+        double screenX;
+        double screenY;
+        boolean behindCamera = depth <= 0;
+
+        if (behindCamera) {
+            double fov = Math.toRadians(MC.options.fov().get());
+            double focalLength = graphics.guiHeight() / (2.0 * Math.tan(fov * 0.5));
+            double safeDepth = Math.max(0.01, Math.abs(depth));
+            double horizontal = cameraOffset.dot(new Vec3(camera.leftVector()).scale(-1.0));
+            double vertical = cameraOffset.dot(new Vec3(camera.upVector()));
+            screenX = centerX + horizontal / safeDepth * focalLength;
+            screenY = centerY - vertical / safeDepth * focalLength;
+        } else {
+            Vec3 projected = RenderUtil.project(worldPosition);
+            if (!Double.isFinite(projected.x) || !Double.isFinite(projected.y))
+                return null;
+            screenX = projected.x;
+            screenY = projected.y;
+        }
+
+        boolean outsideScreen = screenX < 0 || screenX > graphics.guiWidth()
+                || screenY < 0 || screenY > graphics.guiHeight();
+        if (!behindCamera && !outsideScreen)
+            return new float[]{(float) screenX, (float) screenY};
+
+        double dx = screenX - centerX;
+        double dy = screenY - centerY;
+        if (Math.hypot(dx, dy) < 0.001) {
+            dx = 0;
+            dy = -1;
+        }
+
+        double maxX = Math.max(1, centerX - 2);
+        double maxY = Math.max(1, centerY - 2);
+        double scaleX = Math.abs(dx) < 0.001 ? Double.POSITIVE_INFINITY : maxX / Math.abs(dx);
+        double scaleY = Math.abs(dy) < 0.001 ? Double.POSITIVE_INFINITY : maxY / Math.abs(dy);
+        double scale = Math.min(scaleX, scaleY);
+        return new float[]{
+                (float) (centerX + dx * scale),
+                (float) (centerY + dy * scale)
+        };
     }
 
     private void drawScreenLine(GuiGraphics graphics, float startX, float startY,
@@ -133,8 +194,10 @@ public class TracersFeature extends Feature {
         pose.pushMatrix();
         pose.translate((startX + endX) * 0.5f, (startY + endY) * 0.5f);
         pose.rotate((float) Math.atan2(deltaY, deltaX));
-        graphics.fill((int) -Math.ceil(length * 0.5f), -1,
-                (int) Math.ceil(length * 0.5f), 1, color.getRGB());
+        int lineThickness = Math.max(1, (int) Math.round(thickness.get()));
+        int top = -(lineThickness / 2);
+        graphics.fill((int) -Math.ceil(length * 0.5f), top,
+                (int) Math.ceil(length * 0.5f), top + lineThickness, color.getRGB());
         pose.popMatrix();
     }
 }
