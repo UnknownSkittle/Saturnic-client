@@ -101,20 +101,19 @@ Enable logging with `-intel start` and stop it with `-intel stop`. While enabled
 
     ```bash
     git clone https://github.com/Unknown_Skittle/Saturnic.git  
-    cd saturnic
+    cd Saturnic
     ```
-2. In order to get saturnic-api dependency, you need to configure your PAT-token in your root .gradle/gradle.dependency
 
-3. Build with Gradle:
+2. Build with Gradle:
 
     ```bash
     ./gradlew build
     ```
 
-The compiled JAR will be located at:  
-`build/libs/saturnic-<version>.jar`
+The compiled client JAR will be located at:
+`nami-client/build/libs/saturnic-client-<version>.jar`
 
-saturnic-client is packaged with saturnic-api inside of it.
+The client JAR includes the `saturnic-api` dependency.
 
 ---
 

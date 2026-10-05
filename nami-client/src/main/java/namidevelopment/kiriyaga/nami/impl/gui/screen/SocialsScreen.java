@@ -23,7 +23,7 @@ public class SocialsScreen extends NamiScreen {
     private long lastOnlineUpdate;
 
     public SocialsScreen() {
-        super(Component.literal("NamiSocialsScreen"));
+        super(Component.literal("Saturnic Socials"));
     }
 
     private ClickGuiFeature getClickGuiFeature() {

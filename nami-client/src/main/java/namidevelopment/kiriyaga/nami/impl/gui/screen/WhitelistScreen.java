@@ -30,7 +30,7 @@ public class WhitelistScreen extends NamiScreen {
     public float scale = 1;
 
     public WhitelistScreen(WhitelistSetting setting, List<String> allItems) {
-        super(Component.literal("NamiWhitelist"));
+        super(Component.literal("Saturnic Whitelist"));
         this.setting = setting;
         refreshPanels(allItems);
     }

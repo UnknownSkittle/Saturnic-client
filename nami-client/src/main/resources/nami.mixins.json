@@ -54,7 +54,6 @@
     "DuckAbstractContainerMenu",
     "DuckBundlePacket",
     "DuckClientboundExplodePacket",
-    "DuckClientboundPlayerPositionPacket",
     "DuckClientboundSetEntityMotionPacket",
     "DuckServerboundMovePlayerPacket",
     "MixinClientboundSetEntityMotionPacket",

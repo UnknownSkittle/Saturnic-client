@@ -38,7 +38,7 @@ public class HudEditorScreen extends NamiScreen {
     public float scale = CLICK_GUI_SCREEN.scale;
 
     public HudEditorScreen() {
-        super(Component.literal("NamiHudEditorScreen"));
+        super(Component.literal("Saturnic HUD Editor"));
         refreshPanels();
     }
 

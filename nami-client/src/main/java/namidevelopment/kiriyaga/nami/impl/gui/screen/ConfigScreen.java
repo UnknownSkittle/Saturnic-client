@@ -19,7 +19,7 @@ public class ConfigScreen extends NamiScreen {
     private ConsolePanelComponent<ConfigEntry> console;
 
     public ConfigScreen() {
-        super(Component.literal("NamiConfigScreen"));
+        super(Component.literal("Saturnic Configs"));
     }
 
     @Override

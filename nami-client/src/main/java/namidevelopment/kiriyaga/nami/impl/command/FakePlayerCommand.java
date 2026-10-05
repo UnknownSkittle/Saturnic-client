@@ -46,7 +46,7 @@ public class FakePlayerCommand extends Command {
             return;
         }
 
-        String name = "NamiClient";
+        String name = "Saturnic";
 
         double health = 20.0f;
         fakePlayer = new RemotePlayer(MC.level, new GameProfile(UUID.randomUUID(), name));

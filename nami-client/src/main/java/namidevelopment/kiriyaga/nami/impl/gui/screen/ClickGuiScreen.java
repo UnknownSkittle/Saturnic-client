@@ -36,7 +36,7 @@ public class ClickGuiScreen extends NamiScreen {
     public float scale = 1;
 
     public ClickGuiScreen() {
-        super(Component.literal("NamiGuiScreen"));
+        super(Component.literal("Saturnic GUI"));
         refreshPanels();
     }
 

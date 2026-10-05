@@ -21,7 +21,7 @@ public class PluginScreen extends NamiScreen {
     private ConsolePanelComponent<PluginEntry> console;
 
     public PluginScreen() {
-        super(Component.literal("NamiPluginScreen"));
+        super(Component.literal("Saturnic Plugins"));
     }
 
     @Override

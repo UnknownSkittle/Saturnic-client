@@ -17,7 +17,7 @@ public class MixinStringDecomposer {
         if (FEATURE_SERVICE.getStorage() == null || FEATURE_SERVICE.getStorage().getByClass(NameProtectFeature.class) == null)
             return value;
 
-        if (FEATURE_SERVICE.getStorage().getByClass(NameProtectFeature.class).isEnabled()) return value.replaceAll(MC.getUser().getName(), "NamiClient"); // TODO unhardcode that. the day im gonna write runtime lists
+        if (FEATURE_SERVICE.getStorage().getByClass(NameProtectFeature.class).isEnabled()) return value.replace(MC.getUser().getName(), "Saturnic");
         return value;
     }
 }
