@@ -1,19 +1,19 @@
-# Nami
+# Saturnic
 
-This is the last public version of nami made for minecraft 1.21.11
-It wont receive any updates
+This is the Saturnic client for Minecraft 1.21.11.
+It does not currently receive automated updates.
 
 ### Join our discord - https://discord.gg/auHTtNAqRq
 
 <p>
-  <a href="https://github.com/NamiDevelopment/nami/releases">
-    <img src="https://img.shields.io/github/downloads/NamiDevelopment/nami/total?color=green&label=Total%20Downloads" alt="Total Downloads" />
+  <a href="https://github.com/Unknown_Skittle/Saturnic/releases">
+    <img src="https://img.shields.io/github/downloads/Unknown_Skittle/Saturnic/total?color=green&label=Total%20Downloads" alt="Total Downloads" />
   </a>
-  <a href="https://github.com/NamiDevelopment/nami/commits">
-  <img src="https://img.shields.io/github/commit-activity/m/NamiDevelopment/nami?label=Commits%20(last%20month)&color=yellow" alt="month" />
+  <a href="https://github.com/Unknown_Skittle/Saturnic/commits">
+  <img src="https://img.shields.io/github/commit-activity/m/Unknown_Skittle/Saturnic?label=Commits%20(last%20month)&color=yellow" alt="month" />
   </a>
-  <a href="https://github.com/NamiDevelopment/nami/releases">
-    <img src="https://img.shields.io/github/v/release/Kiriyaga7615/nami?color=blue&label=Latest%20Release" alt="Latest Release" />
+  <a href="https://github.com/Unknown_Skittle/Saturnic/releases">
+    <img src="https://img.shields.io/github/v/release/Unknown_Skittle/Saturnic?color=blue&label=Latest%20Release" alt="Latest Release" />
   </a>
   <a href="https://discord.gg/auHTtNAqRq">
     <img src="https://img.shields.io/discord/1298742596633497744?color=7289DB&label=Discord" alt="Discord" />
@@ -25,7 +25,7 @@ It wont receive any updates
 ![# badge](assets/readme/works-on-selfmerging.svg)
 
 
-**Nami** is a modular and lightweight anarchy client base built for PVE and automation.  
+**Saturnic** is a modular and lightweight anarchy client base built for PVE and automation.  
 
 Most popular Minecraft clients are closed-source, paid, and obfuscated, making them difficult to audit or trust. Some may include backdoors or malicious code.
 
@@ -49,7 +49,7 @@ This project started as a clean, open-source alternative aiming to be transparen
 
 ## Plugin development
 
-See https://github.com/NamiDevelopment/template-plugin for information
+See https://github.com/Unknown_Skittle/Saturnic for information
 
 ---
 
@@ -85,10 +85,10 @@ The default command prefix is `-`.
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/NamiDevelopment/Nami.git  
-    cd nami
+    git clone https://github.com/Unknown_Skittle/Saturnic.git  
+    cd saturnic
     ```
-2. In order to get nami-api dependency,you need to configure your PAT-token in your root .gradle/gradle.dependency
+2. In order to get saturnic-api dependency, you need to configure your PAT-token in your root .gradle/gradle.dependency
 
 3. Build with Gradle:
 
@@ -97,9 +97,9 @@ The default command prefix is `-`.
     ```
 
 The compiled JAR will be located at:  
-`build/libs/nami-<version>.jar`
+`build/libs/saturnic-<version>.jar`
 
-nami-client is packaged with nami-api inside of it.
+saturnic-client is packaged with saturnic-api inside of it.
 
 ---
 

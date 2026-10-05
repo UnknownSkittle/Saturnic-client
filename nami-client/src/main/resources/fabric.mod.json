@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "id": "nami-client",
+  "id": "saturnic-client",
   "version": "${version}",
-  "name": "Nami Client",
+  "name": "Saturnic Client",
   "description": "A high-performance, modular client for anarchy servers.",
-  "authors": ["Kiriyaga"],
+  "authors": ["Unknown_Skittle"],
   "contact": {
-    "sources": "https://github.com/NamiDevelopment/nami"
+    "sources": "https://github.com/Unknown_Skittle/Saturnic"
   },
   "license": "MIT",
   "environment": "*",
@@ -24,6 +24,6 @@
     "fabricloader": ">=0.18.2",
     "fabric": "*",
     "minecraft": "1.21.11",
-    "nami-api": "*"
+    "saturnic-api": "*"
   }
 }

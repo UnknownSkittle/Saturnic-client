@@ -23,12 +23,12 @@ import org.apache.logging.log4j.Logger;
 
 public class NamiApi implements ClientModInitializer {
 
-    public static String NAME = "Nami";
+    public static String NAME = "Saturnic";
     public static final Logger LOGGER = LogManager.getLogger(NAME);
     public static final Minecraft MC = Minecraft.getInstance();
     public static final String API_VERSION;
     static {
-        ModContainer mod = FabricLoader.getInstance().getModContainer("nami-api").orElse(null);
+        ModContainer mod = FabricLoader.getInstance().getModContainer("saturnic-api").orElse(null);
         if (mod != null) {
             API_VERSION = mod.getMetadata().getVersion().getFriendlyString();
         } else {

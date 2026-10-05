@@ -14,12 +14,12 @@ import net.minecraft.util.Tuple;
 import static namidevelopment.kiriyaga.api.NamiApi.*;
 
 public class Nami implements ClientModInitializer {
-    public static String DISPLAY_NAME = "Nami";
+    public static String DISPLAY_NAME = "Saturnic";
     public static long START_TIME = 0;
 
     public static final String VERSION;
     static {
-        ModContainer mod = FabricLoader.getInstance().getModContainer("nami-client").orElse(null);
+        ModContainer mod = FabricLoader.getInstance().getModContainer("saturnic-client").orElse(null);
         if (mod != null) {
             VERSION = mod.getMetadata().getVersion().getFriendlyString();
         } else {

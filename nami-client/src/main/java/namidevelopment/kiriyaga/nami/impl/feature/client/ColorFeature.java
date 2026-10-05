@@ -17,12 +17,12 @@ import java.awt.*;
 @RegisterFeature
 public class ColorFeature extends Feature implements ColorFeatureConfig {
 
-    public final ColorSetting globalColor = addSetting(new ColorSetting("Global", new Color(50, 137, 179, 255), true));
+    public final ColorSetting globalColor = addSetting(new ColorSetting("Global", new Color(255, 0, 106, 255), true));
     public final BoolSetting rainbowEnabled = addSetting(new BoolSetting("Rainbow", false));
     public final DoubleSetting rainbowSpeed = addSetting(new DoubleSetting("Speed", 0.005, 0.0001, 1.50));
 
-    public final ColorSetting friendColor = addSetting(new ColorSetting("Friend", new Color(85, 255, 255, 255), true));
-    public final ColorSetting enemyColor = addSetting(new ColorSetting("Enemy", new Color(255, 85, 85, 255), true));
+    public final ColorSetting friendColor = addSetting(new ColorSetting("Friend", new Color(255, 0, 106, 255), true));
+    public final ColorSetting enemyColor = addSetting(new ColorSetting("Enemy", new Color(255, 74, 107, 255), true));
 
     private int phase = 0;
 

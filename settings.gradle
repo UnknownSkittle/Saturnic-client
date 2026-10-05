@@ -11,7 +11,7 @@ pluginManagement {
         maven { url = uri("https://jitpack.io") }
     }
 }
-rootProject.name = "nami"
+rootProject.name = "Saturnic"
 
 include(":nami-api")
 include(":nami-client")

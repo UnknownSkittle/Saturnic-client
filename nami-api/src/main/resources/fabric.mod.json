@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
-  "id": "nami-api",
+  "id": "saturnic-api",
   "version": "${version}",
 
-  "name": "Nami API",
-  "description": "The API for nami client.",
+  "name": "Saturnic API",
+  "description": "The API for the Saturnic client.",
+  "authors": ["Unknown_Skittle"],
   "license": "MIT",
   "environment": "*",
   "entrypoints": {
