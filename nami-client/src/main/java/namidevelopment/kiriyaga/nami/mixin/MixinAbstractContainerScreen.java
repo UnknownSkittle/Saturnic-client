@@ -5,9 +5,12 @@ import namidevelopment.kiriyaga.api.event.impl.MouseScrollEvent;
 import namidevelopment.kiriyaga.api.event.impl.RenderSlotsEvent;
 import namidevelopment.kiriyaga.api.event.impl.RenderTooltipEvent;
 import namidevelopment.kiriyaga.nami.impl.feature.client.PatchFeature;
+import namidevelopment.kiriyaga.nami.impl.util.ContainerActions;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.ContainerScreen;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BannerItem;
@@ -24,11 +27,32 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import static namidevelopment.kiriyaga.nami.Nami.*;
 import static namidevelopment.kiriyaga.api.NamiApi.*;
 @Mixin(AbstractContainerScreen.class)
-public class MixinAbstractContainerScreen<T extends AbstractContainerMenu> {
+public abstract class MixinAbstractContainerScreen<T extends AbstractContainerMenu> {
     @Shadow
     @Final
     protected T menu;
     @Shadow protected Slot hoveredSlot;
+    @Shadow protected int leftPos;
+    @Shadow protected int topPos;
+    @Shadow public int imageWidth;
+
+    @Inject(method = "init", at = @At("TAIL"))
+    private void addChestActions(CallbackInfo ci) {
+        if (!(((Object) this) instanceof ContainerScreen) || MC.player == null
+                || MC.player.containerMenu.slots.size() <= 36)
+            return;
+
+        int buttonY = Math.max(2, topPos - 21);
+        DuckScreen screen = (DuckScreen) this;
+        screen.nami$addRenderableWidget(Button.builder(net.minecraft.network.chat.Component.literal("Loot"), button ->
+                        ContainerActions.transferContainer(menu, true))
+                .bounds(leftPos + imageWidth - 100, buttonY, 48, 18)
+                .build());
+        screen.nami$addRenderableWidget(Button.builder(net.minecraft.network.chat.Component.literal("Store"), button ->
+                        ContainerActions.transferContainer(menu, false))
+                .bounds(leftPos + imageWidth - 50, buttonY, 48, 18)
+                .build());
+    }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void onMouseClicked(MouseButtonEvent click, boolean bl, CallbackInfoReturnable<Boolean> cir) {

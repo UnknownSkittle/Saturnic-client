@@ -11,16 +11,15 @@ import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
 import namidevelopment.kiriyaga.api.model.setting.WhitelistSetting;
 import namidevelopment.kiriyaga.api.util.BlockUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
-import net.minecraft.client.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.phys.Vec3;
 
 import java.awt.*;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -35,7 +34,6 @@ public class BlockSearchFeature extends Feature {
 
     private final WhitelistSetting blockList = addSetting(new WhitelistSetting("Whitelist", true, WhitelistSetting.Type.BLOCK));
     public final BoolSetting fill = addSetting(new BoolSetting("Fill", true));
-    public final BoolSetting tracers = addSetting(new BoolSetting("Tracers", false));
     public final BoolSetting notAtSpawn = addSetting(new BoolSetting("NotAtSpawn", false));
 
     private Set<Identifier> candidateIds = new HashSet<>();
@@ -123,12 +121,6 @@ public class BlockSearchFeature extends Feature {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void onRender(Render3DEvent event) {
         if (MC.level == null || MC.player == null) return;
-        Camera camera = MC.gameRenderer.getMainCamera();
-
-        Vec3 camPos = camera.position();
-        Vec3 start = camPos.add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()));
-
-
         for (Set<BlockPos> set : chunkBlocks.values()) {
             for (BlockPos pos : set) {
                 var state = MC.level.getBlockState(pos);
@@ -136,11 +128,12 @@ public class BlockSearchFeature extends Feature {
 
                 RenderUtil.drawBlockPosLines(MC.level, pos, state, color, fill.get(), true, 1.5f);
 
-                if (tracers.get()) {
-                    RenderUtil.drawLine(start, Vec3.atCenterOf(pos), color, 1.5f);
-                }
             }
         }
+    }
+
+    public static Collection<Set<BlockPos>> getFoundChunks() {
+        return chunkBlocks.values();
     }
 
     private void reloadChunks() {

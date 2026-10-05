@@ -12,13 +12,11 @@ import namidevelopment.kiriyaga.api.util.ColorUtils;
 import namidevelopment.kiriyaga.api.util.entity.EntityUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
 import namidevelopment.kiriyaga.nami.impl.feature.client.ColorFeature;
-import net.minecraft.client.Camera;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.awt.*;
 
@@ -29,8 +27,6 @@ public class EntitySearchFeature extends Feature {
 
     private final WhitelistSetting entityWhitelist = addSetting(new WhitelistSetting("Whitelist", true, WhitelistSetting.Type.ENTITY));
     public final BoolSetting renderBoxes = addSetting(new BoolSetting("Render", true));
-    public final BoolSetting tracers = addSetting(new BoolSetting("Tracers", false));
-
     public EntitySearchFeature() {
         super("EntitySearch", "Searchs for specified entities.", FeatureCategory.of("Render"));
     }
@@ -39,14 +35,10 @@ public class EntitySearchFeature extends Feature {
     public void onRender(Render3DEvent event) {
         if (MC.level == null || MC.player == null) return;
 
-        Camera camera = MC.gameRenderer.getMainCamera();
-        var camPos = camera.position();
-        var start = camPos.add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()));
-
         for (Entity entity : EntityUtils.getEntities(EntityUtils.EntityTypeCategory.ALL)) {
             if (entity.isRemoved() || !entity.isAlive()) continue;
 
-            if (!entityWhitelist.getWhitelist().contains(EntityType.getKey(entity.getType()))) continue;
+            if (!matchesEntity(entity)) continue;
 
             Color color = getColorForEntity(entity);
 
@@ -64,13 +56,14 @@ public class EntitySearchFeature extends Feature {
                 RenderUtil.drawBoxLines(box, color, true, true, 1.5f);
             }
 
-            if (tracers.get()) {
-                RenderUtil.drawLine(start, box.getCenter(), color, 1.5f);
-            }
         }
     }
 
-    private Color getColorForEntity(Entity entity) {
+    boolean matchesEntity(Entity entity) {
+        return entityWhitelist.getWhitelist().contains(EntityType.getKey(entity.getType()));
+    }
+
+    Color getColorForEntity(Entity entity) {
         if (entity instanceof Player) {
             return FEATURE_SERVICE.getStorage().getByClass(ColorFeature.class).getStyledGlobalColor();
         }

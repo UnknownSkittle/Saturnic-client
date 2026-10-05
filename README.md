@@ -93,6 +93,10 @@ No source-level OS or CPU checks are used by the client itself. These notes desc
 
 Enable logging with `-intel start` and stop it with `-intel stop`. While enabled, the client records nearby player sightings and visit density locally in `Saturnic/player-intel.json` under the Minecraft game directory, separated by server and dimension. View recent player coordinates with `-intel players`. Add a base marker at your current position with `-intel base <name>`, remove it with `-intel remove <name>`, and list saved markers with `-intel list`. Open the top-down heatmap with `-intel map`. Replace `-` with the configured command prefix if it has been changed.
 
+## Added features
+
+The client includes configurable Flight, NoFall, and ClickTP movement features; Aura can optionally attack multiple targets. The separate Tracers feature can draw to selected ESP, EntitySearch, ItemSearch, and BlockSearch targets, with a configurable range. StorageESP highlights storage blocks in loaded chunks and BaseFinder marks dense storage-block clusters as possible bases. Chest screens include Loot and Store buttons for quick-moving items, and ChestStealer can transfer chest contents with a configurable delay. These features are subject to server rules and server-side movement or interaction checks.
+
 ---
 
 ## How to Build

@@ -17,6 +17,7 @@ import namidevelopment.kiriyaga.nami.impl.feature.movement.SprintFeature;
 import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
 import namidevelopment.kiriyaga.api.model.setting.DoubleSetting;
 import namidevelopment.kiriyaga.api.model.setting.EnumSetting;
+import namidevelopment.kiriyaga.api.model.setting.IntSetting;
 import namidevelopment.kiriyaga.api.util.EnchantmentUtils;
 import namidevelopment.kiriyaga.api.util.entity.TargetUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
@@ -64,12 +65,15 @@ public class AuraFeature extends Feature {
     public final EnumSetting<Rotate> rotate = addSetting(new EnumSetting<>("Rotate", Rotate.NORMAL));
     public final BoolSetting swing = addSetting(new BoolSetting("Swing", true));
     public final BoolSetting render = addSetting(new BoolSetting("Render", true));
+    public final BoolSetting multiTarget = addSetting(new BoolSetting("MultiTarget", false));
+    public final IntSetting maxTargets = addSetting(new IntSetting("MaxTargets", 3, 2, 6));
 
     private Entity currentTarget = null;
     private float attackCooldownTicks = 0f;
 
     public AuraFeature() {
         super("Aura", "Attacks certain targets automatically.", FeatureCategory.of("Combat"), "killaura", "ara", "killara");
+        maxTargets.setShowCondition(multiTarget::get);
     }
 
     @Override
@@ -238,6 +242,23 @@ public class AuraFeature extends Feature {
 
         if (swing.get())
             MC.player.swing(InteractionHand.MAIN_HAND);
+
+        if (multiTarget.get()) {
+            int attackedTargets = 1;
+            for (Entity extraTarget : TargetUtils.getTargets(maxTargets.get(), attackRange.get())) {
+                if (attackedTargets >= maxTargets.get())
+                    break;
+                if (extraTarget == target || extraTarget.isRemoved() || !extraTarget.isAlive())
+                    continue;
+                Vec3 extraPoint = getClosestPointToEye(MC.player.getEyePosition(1.0f), extraTarget.getBoundingBox());
+                if (MC.player.getEyePosition().distanceTo(extraPoint) > attackRange.get())
+                    continue;
+                MC.gameMode.attack(MC.player, extraTarget);
+                attackedTargets++;
+                if (swing.get())
+                    MC.player.swing(InteractionHand.MAIN_HAND);
+            }
+        }
 
         if (stopSprinting.get() == Sprint.PACKET)
             if (b)

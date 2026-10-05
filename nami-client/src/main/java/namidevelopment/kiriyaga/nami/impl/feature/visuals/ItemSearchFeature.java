@@ -10,7 +10,6 @@ import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
 import namidevelopment.kiriyaga.api.model.setting.WhitelistSetting;
 import namidevelopment.kiriyaga.api.util.entity.EntityUtils;
 import namidevelopment.kiriyaga.api.util.render.RenderUtil;
-import net.minecraft.client.Camera;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -18,7 +17,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -31,7 +29,6 @@ public class ItemSearchFeature extends Feature {
 
     private final WhitelistSetting itemWhitelist = addSetting(new WhitelistSetting("Whitelist", true, WhitelistSetting.Type.ENTITY));
     public final BoolSetting renderBoxes = addSetting(new BoolSetting("Render", true));
-    public final BoolSetting tracers = addSetting(new BoolSetting("Tracers", false));
     public final BoolSetting itemFrames = addSetting(new BoolSetting("ItemFrames", false));
     public final BoolSetting chatFeedback = addSetting(new BoolSetting("ChatFeedback", false));
 
@@ -44,18 +41,11 @@ public class ItemSearchFeature extends Feature {
     public void onRender(Render3DEvent event) {
         if (MC.level == null || MC.player == null) return;
 
-        Camera camera = MC.gameRenderer.getMainCamera();
-        Vec3 camPos = camera.position();
-        Vec3 start = camPos.add(Vec3.directionFromRotation(camera.xRot(), camera.yRot()));
-
         for (Entity entity : EntityUtils.getEntities(EntityUtils.EntityTypeCategory.DROPPED_ITEMS)) {
             if (entity instanceof ItemEntity item) {
                 if (item.isRemoved() || !item.isAlive()) continue;
 
-
-                Identifier id = BuiltInRegistries.ITEM.getKey(item.getItem().getItem());
-
-                if (!itemWhitelist.getWhitelist().contains(id)) continue;
+                if (!matchesItem(item)) continue;
 
                 double interpX = item.xOld + (item.getX() - item.xOld) * event.getTickDelta();
                 double interpY = item.yOld + (item.getY() - item.yOld) * event.getTickDelta();
@@ -65,10 +55,6 @@ public class ItemSearchFeature extends Feature {
 
                 if (renderBoxes.get()) {
                     RenderUtil.drawBoxLines(box, COLOR_ITEM, true, true, 1.5f);
-                }
-
-                if (tracers.get()) {
-                    RenderUtil.drawLine(start, box.getCenter(), COLOR_ITEM, 1.5f);
                 }
 
                 Integer entId = entity.getId();
@@ -86,8 +72,7 @@ public class ItemSearchFeature extends Feature {
 
                 if (frame.getItem().isEmpty()) continue;
 
-                Identifier id = BuiltInRegistries.ITEM.getKey(frame.getItem().getItem());
-                if (!itemWhitelist.getWhitelist().contains(id)) continue;
+                if (!matchesItem(frame)) continue;
                 double interpX = frame.xOld + (frame.getX() - frame.xOld) * event.getTickDelta();
                 double interpY = frame.yOld + (frame.getY() - frame.yOld) * event.getTickDelta();
                 double interpZ = frame.zOld + (frame.getZ() - frame.zOld) * event.getTickDelta();
@@ -98,10 +83,6 @@ public class ItemSearchFeature extends Feature {
                     RenderUtil.drawBoxLines(box, COLOR_ITEM, true, true, 1.5f);
                 }
 
-                if (tracers.get()) {
-                    RenderUtil.drawLine(start, box.getCenter(), COLOR_ITEM, 1.5f);
-                }
-
                 Integer entId = entity.getId();
 
                 if (!sent.contains(entId) && chatFeedback.get()) {
@@ -110,6 +91,16 @@ public class ItemSearchFeature extends Feature {
                     sent.add(entId);
                 }
             }
+
         }
+    }
+
+    boolean matchesItem(Entity entity) {
+        if (entity instanceof ItemEntity item)
+            return itemWhitelist.getWhitelist().contains(BuiltInRegistries.ITEM.getKey(item.getItem().getItem()));
+        if (entity instanceof ItemFrame frame)
+            return itemFrames.get() && !frame.getItem().isEmpty()
+                    && itemWhitelist.getWhitelist().contains(BuiltInRegistries.ITEM.getKey(frame.getItem().getItem()));
+        return false;
     }
 }

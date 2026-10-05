@@ -100,7 +100,7 @@ public class ESPFeature extends Feature {
         }
     }
 
-    private Set<Entity> getEntitiesToRender() {
+    Set<Entity> getEntitiesToRender() {
         Set<Entity> entities = new HashSet<>();
 
         if (showPlayers.get()) entities.addAll(EntityUtils.getOtherPlayers());
@@ -108,6 +108,7 @@ public class ESPFeature extends Feature {
         if (showNeutrals.get()) entities.addAll(EntityUtils.getEntities(EntityUtils.EntityTypeCategory.NEUTRAL));
         if (showHostiles.get()) entities.addAll(EntityUtils.getEntities(EntityUtils.EntityTypeCategory.HOSTILE));
         if (showItems.get()) entities.addAll(EntityUtils.getEntities(EntityUtils.EntityTypeCategory.DROPPED_ITEMS));
+        if (showCrystals.get()) entities.addAll(EntityUtils.getEntities(EntityUtils.EntityTypeCategory.END_CRYSTALS));
 
         if (renderMode.get() == RenderMode.GLOW) {
             double maxDistSq = outlineDistance.get() * outlineDistance.get();
@@ -117,8 +118,10 @@ public class ESPFeature extends Feature {
         return entities;
     }
 
-    private Color getColorForEntity(Entity entity, ColorFeature colorFeature) {
+    Color getColorForEntity(Entity entity, ColorFeature colorFeature) {
         if (entity instanceof Player) {
+            return colorFeature.getStyledGlobalColor();
+        } else if (entity instanceof EndCrystal) {
             return colorFeature.getStyledGlobalColor();
         } else if (EntityUtils.getEntities(EntityUtils.EntityTypeCategory.PASSIVE).contains(entity)) {
             return ColorUtils.COLOR_PASSIVE;

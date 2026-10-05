@@ -40,4 +40,3 @@ public abstract class MixinScreen {
         EVENT_SERVICE.post(new RenderScreenEvent(context, null, mouseX, mouseY));
     }
 }
-
