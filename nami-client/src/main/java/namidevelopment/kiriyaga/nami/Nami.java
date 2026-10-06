@@ -1,6 +1,8 @@
 package namidevelopment.kiriyaga.nami;
 
 import namidevelopment.kiriyaga.nami.contract.ClientFeatureContracts;
+import namidevelopment.kiriyaga.nami.impl.feature.client.HudFeature;
+import namidevelopment.kiriyaga.nami.impl.feature.client.HudRenderService;
 import namidevelopment.kiriyaga.nami.impl.gui.component.NavigatePanelComponent;
 import namidevelopment.kiriyaga.nami.impl.gui.screen.*;
 import namidevelopment.kiriyaga.nami.impl.feature.visuals.PlayerIntelFeature;
@@ -49,6 +51,8 @@ public class Nami implements ClientModInitializer {
         COMMAND_SERVICE.init();
 
         ClientFeatureContracts.register(FEATURE_SERVICE.getStorage());
+        EVENT_SERVICE.register(new HudRenderService(
+                FEATURE_SERVICE.getStorage().getByClass(HudFeature.class)));
 
         CLICK_GUI_SCREEN = new ClickGuiScreen();
         HUD_EDITOR_SCREEN = new HudEditorScreen();
