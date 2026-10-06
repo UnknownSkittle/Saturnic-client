@@ -17,11 +17,15 @@ import static namidevelopment.kiriyaga.api.NamiApi.*;
 @RegisterFeature
 public class SpeedFeature extends Feature {
 
+    public enum Compatibility { DEFAULT, GRIMAC, GRIMAC_NEW, NCP, VULKAN }
+
     private enum Mode {
         ROTATION
     }
 
     public final EnumSetting<Mode> mode = addSetting(new EnumSetting<>("Mode", Mode.ROTATION));
+    public final EnumSetting<Compatibility> compatibility =
+            addSetting(new EnumSetting<>("Compatibility", Compatibility.DEFAULT));
     public final BoolSetting inLiquid = addSetting(new BoolSetting("InWater", true));
 
     public SpeedFeature() {
@@ -43,10 +47,30 @@ public class SpeedFeature extends Feature {
         this.addDisplayInfo(mode.get().toString());
 
         if (mode.get() == Mode.ROTATION && isMoving()) {
-            float yaw = INPUT_SERVICE.getClientHandler().getDirection();
+            float targetYaw = INPUT_SERVICE.getClientHandler().getDirection();
+            if (compatibility.get() == Compatibility.DEFAULT) {
+                ROTATION_SERVICE.getRequestHandler().submit(new RotationRequest(
+                        SpeedFeature.class.getName(), 1, targetYaw, MC.player.getXRot(), RotationsFeature.RotationMode.MOTION
+                ));
+                return;
+            }
+
+            float serverYaw = ROTATION_SERVICE.getStateHandler().getServerYRot();
+            float yawDelta = Mth.wrapDegrees(targetYaw - serverYaw);
+            float yaw = serverYaw + Mth.clamp(yawDelta, -maxRotationStep(), maxRotationStep());
             float pitch = MC.player.getXRot();
             ROTATION_SERVICE.getRequestHandler().submit(new RotationRequest(SpeedFeature.class.getName(), 1, yaw, pitch, RotationsFeature.RotationMode.MOTION));
         }
+    }
+
+    private float maxRotationStep() {
+        return switch (compatibility.get()) {
+            case DEFAULT -> 180.0f;
+            case GRIMAC -> 45.0f;
+            case GRIMAC_NEW -> 30.0f;
+            case NCP -> 60.0f;
+            case VULKAN -> 45.0f;
+        };
     }
 
     private boolean isMoving() {

@@ -34,7 +34,11 @@ public class ElytraFlyFeature extends Feature {
         BOUNCE, ROTATION, GLIDE
     }
 
+    public enum Compatibility { DEFAULT, GRIMAC, GRIMAC_NEW, NCP, VULKAN }
+
     public final EnumSetting<FlyMode> mode = addSetting(new EnumSetting<>("Mode", FlyMode.BOUNCE));
+    public final EnumSetting<Compatibility> compatibility =
+            addSetting(new EnumSetting<>("Compatibility", Compatibility.DEFAULT));
 
     // GLIDE
     public final IntSetting targetY = addSetting(new IntSetting("TargetY", 180, 60, 600));
@@ -74,6 +78,7 @@ public class ElytraFlyFeature extends Feature {
     private double cruisePhase = 0;
     private long rocket = 0;
     private boolean climbingToTarget = false;
+    private int bounceTicks;
 
     private final Timer hoverTimer = new Timer();
     private boolean hoverB = true;
@@ -106,6 +111,7 @@ public class ElytraFlyFeature extends Feature {
             glideState = GlideState.CLIMB;
             cruisePhase = 0;
         }
+        bounceTicks = 0;
     }
 
     @Override
@@ -165,11 +171,14 @@ public class ElytraFlyFeature extends Feature {
             }*/
 
             if (pitch.get())
-                ROTATION_SERVICE.getRequestHandler().submit(new RotationRequest(this.getName(), 1, MC.player.getYRot(), pitchDegree.get().floatValue(), RotationsFeature.RotationMode.MOTION));
+                requestRotation(MC.player.getYRot(), pitchDegree.get().floatValue());
 
-            MC.player.connection.send(
-                    new ServerboundPlayerCommandPacket(MC.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING)
-            );
+            if (++bounceTicks >= bounceInterval()) {
+                MC.player.connection.send(
+                        new ServerboundPlayerCommandPacket(MC.player, ServerboundPlayerCommandPacket.Action.START_FALL_FLYING)
+                );
+                bounceTicks = 0;
+            }
         } else
         if (mode.get() == FlyMode.ROTATION) {
             if (!MC.player.isFallFlying()) return;
@@ -187,7 +196,7 @@ public class ElytraFlyFeature extends Feature {
                     if (lockPitch.get()) finalXRot = -3f;
                 }
 
-                ROTATION_SERVICE.getRequestHandler().submit(new RotationRequest(this.getName(), 1, finalYRot, finalXRot, RotationsFeature.RotationMode.MOTION));
+                requestRotation(finalYRot, finalXRot);
             } else if (hover.get()) {
                 int hoverMs = hoverSpeed.get() * 50;
                 if (hoverTimer.hasElapsed(hoverMs)) {
@@ -198,7 +207,7 @@ public class ElytraFlyFeature extends Feature {
                 float targetYaw = MC.player.getYRot() + (hoverB ? 0f : 180f);
                 float targetPitch = -3f;
 
-                ROTATION_SERVICE.getRequestHandler().submit(new RotationRequest(this.getName(), 1, targetYaw, targetPitch, RotationsFeature.RotationMode.MOTION));
+                requestRotation(targetYaw, targetPitch);
             }
         } else if (mode.get() == FlyMode.GLIDE) {
             if (!MC.player.isFallFlying())
@@ -258,12 +267,44 @@ public class ElytraFlyFeature extends Feature {
             float smoothPitch = approach(currentPitch, targetPitch, 10);
 
             //TODO yaw smooth n
-            ROTATION_SERVICE.getRequestHandler().submit(
-                    new RotationRequest(this.getName(), 1, MC.player.getYRot(), smoothPitch, RotationsFeature.RotationMode.MOTION)
-            );
+            requestRotation(MC.player.getYRot(), smoothPitch);
         }
     }
 
+    private void requestRotation(float targetYaw, float targetPitch) {
+        if (compatibility.get() == Compatibility.DEFAULT) {
+            ROTATION_SERVICE.getRequestHandler().submit(
+                    new RotationRequest(this.getName(), 1, targetYaw, targetPitch, RotationsFeature.RotationMode.MOTION)
+            );
+            return;
+        }
+
+        float serverYaw = ROTATION_SERVICE.getStateHandler().getServerYRot();
+        float serverPitch = ROTATION_SERVICE.getStateHandler().getServerXRot();
+        float maxStep = maxRotationStep();
+        float yaw = serverYaw + Mth.clamp(Mth.wrapDegrees(targetYaw - serverYaw), -maxStep, maxStep);
+        float pitch = serverPitch + Mth.clamp(targetPitch - serverPitch, -maxStep, maxStep);
+        ROTATION_SERVICE.getRequestHandler().submit(
+                new RotationRequest(this.getName(), 1, yaw, pitch, RotationsFeature.RotationMode.MOTION)
+        );
+    }
+
+    private int bounceInterval() {
+        return switch (compatibility.get()) {
+            case DEFAULT -> 1;
+            case GRIMAC, NCP, VULKAN -> 2;
+            case GRIMAC_NEW -> 3;
+        };
+    }
+
+    private float maxRotationStep() {
+        return switch (compatibility.get()) {
+            case DEFAULT -> 180.0f;
+            case GRIMAC, VULKAN -> 45.0f;
+            case GRIMAC_NEW -> 30.0f;
+            case NCP -> 60.0f;
+        };
+    }
 
     private float cruisePitch() {
         double dt = 1.0 / 20.0;
