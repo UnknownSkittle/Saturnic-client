@@ -81,6 +81,10 @@ public class Nami implements ClientModInitializer {
                 DISPLAY_NAME = CONFIG_SERVICE.loadName();
             COMMAND_SERVICE.getExecutor().setPrefix(CONFIG_SERVICE.loadPrefix());
             CONFIG_SERVICE.loadMacros();
+
+            if (AnarchyModDownloadScreen.shouldPrompt()) {
+                client.execute(() -> client.setScreen(new AnarchyModDownloadScreen(client.screen)));
+            }
         });
 
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {

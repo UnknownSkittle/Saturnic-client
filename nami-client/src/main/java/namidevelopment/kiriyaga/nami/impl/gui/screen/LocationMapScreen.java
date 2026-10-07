@@ -40,10 +40,10 @@ public class LocationMapScreen extends NamiScreen {
         graphics.drawString(font, String.format("Center: %.0f, %.0f   View radius: %.0f blocks",
                 centerX, centerZ, radius), 14, 31, 0xFFB8C6C9);
 
-        int availableSize = Math.max(1, Math.min(width - 32, height - 100));
+        int availableSize = Math.max(1, Math.min(width - 32, height - 116));
         int mapSize = Math.max(1, Math.min(availableSize, 1000));
         int left = (width - mapSize) / 2;
-        int top = 58 + Math.max(0, (height - 100 - mapSize) / 2);
+        int top = 58 + Math.max(0, (height - 116 - mapSize) / 2);
         mapBounds = new Rectangle(left, top, mapSize, mapSize);
 
         PlayerIntelFeature.WorldIntel world = intelFeature.getCurrentWorldIntel();
@@ -53,9 +53,11 @@ public class LocationMapScreen extends NamiScreen {
         IntelMapRenderer.drawMap(graphics, font, world, mapBounds, centerX, centerZ, radius,
                 hasPlayer, playerX, playerZ, true);
 
-        graphics.drawString(font, "Scroll: zoom   Drag: pan   Cyan: you   Red: player sightings   Green: bases",
-                14, height - 28, 0xFFD4DEDF);
-        graphics.drawString(font, "Heat fades with age; visit density is sampled locally.   Esc: close",
+        graphics.drawString(font, "Cyan: you   Red: last observed player position   Green: saved base",
+                14, height - 41, 0xFFD4DEDF);
+        graphics.drawString(font, "Heat: blue=fewer visits, orange=more; fades out after 7 days",
+                14, height - 28, 0xFF9EABAE);
+        graphics.drawString(font, "Scroll: zoom   Drag: pan   Esc: close",
                 14, height - 15, 0xFF9EABAE);
         super.render(graphics, mouseX, mouseY, delta);
     }

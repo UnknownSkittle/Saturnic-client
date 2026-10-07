@@ -56,6 +56,10 @@ The default command prefix is `-`.
 
 Enable logging with `-intel start` and stop it with `-intel stop`. While enabled, the client records nearby player sightings and your own visited areas locally in `Saturnic/player-intel.json` under the Minecraft game directory, separated by server and dimension. Toggle the `IntelMinimap` HUD feature for a movable, configurable minimap; assign its `OpenMap` setting to a key to open the interactive fullscreen map. The full map supports mouse-wheel zoom, drag panning, and recentering. Heat shows recent visit density and fades with age; player sightings and saved bases use separate markers. View recent player coordinates with `-intel players`. Add a base marker at your current position with `-intel base <name>`, remove it with `-intel remove <name>`, and list saved markers with `-intel list`. Open the fullscreen map directly with `-intel map`. Replace `-` with the configured command prefix if it has been changed.
 
+## AnarchyMod first-run setup
+
+On first startup, Saturnic asks whether you want to download and install the third-party AnarchyMod 1.4.3 for 6b6t. Choosing Yes downloads the JAR from the configured HTTPS release URL, validates that it is a Fabric mod archive, and places it in the Minecraft `mods/` directory for the next launch. Choosing No (or closing the prompt) records that choice and prevents another first-run prompt. Run `-anarchymod` to open the prompt again. Only install third-party code if you trust its publisher; the archive check confirms its format, not that the code is safe. Replace `-` with the configured command prefix if it has been changed.
+
 
 ## How to Build
 
@@ -80,4 +84,3 @@ The client JAR includes the `saturnic-api` dependency.
 ## License
 
 This project is licensed under the GNU General Public License v3.0 only. See [LICENSE](./LICENSE)
-

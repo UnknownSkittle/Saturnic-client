@@ -35,15 +35,17 @@ public final class IntelMapRenderer {
             for (PlayerIntelFeature.HeatCell cell : world.heat.values()) {
                 if (cell == null || cell.visits <= 0) continue;
 
-                double worldX = (double) cell.cellX * PlayerIntelFeature.HEAT_CELL_SIZE
-                        + PlayerIntelFeature.HEAT_CELL_SIZE / 2.0;
-                double worldZ = (double) cell.cellZ * PlayerIntelFeature.HEAT_CELL_SIZE
-                        + PlayerIntelFeature.HEAT_CELL_SIZE / 2.0;
-                int x = worldToScreenX(left, size, worldX, centerX, scale);
-                int y = worldToScreenY(top, size, worldZ, centerZ, scale);
-                int cellSize = Math.max(2, (int) Math.ceil(PlayerIntelFeature.HEAT_CELL_SIZE * scale));
-                int half = cellSize / 2;
-                graphics.fill(x - half, y - half, x + cellSize - half, y + cellSize - half,
+                double cellWorldLeft = (double) cell.cellX * PlayerIntelFeature.HEAT_CELL_SIZE;
+                double cellWorldTop = (double) cell.cellZ * PlayerIntelFeature.HEAT_CELL_SIZE;
+                int cellLeft = worldToScreenX(left, size, cellWorldLeft, centerX, scale);
+                int cellTop = worldToScreenY(top, size, cellWorldTop, centerZ, scale);
+                int cellRight = worldToScreenX(left, size,
+                        cellWorldLeft + PlayerIntelFeature.HEAT_CELL_SIZE, centerX, scale);
+                int cellBottom = worldToScreenY(top, size,
+                        cellWorldTop + PlayerIntelFeature.HEAT_CELL_SIZE, centerZ, scale);
+                if (cellRight <= cellLeft || cellBottom <= cellTop) continue;
+
+                graphics.fill(cellLeft, cellTop, cellRight, cellBottom,
                         heatColor(cell.visits, maxVisits, cell.lastVisit, now));
             }
 
@@ -130,12 +132,12 @@ public final class IntelMapRenderer {
     }
 
     private static int heatColor(int visits, int maxVisits, long lastVisit, long now) {
-        float intensity = maxVisits <= 1 ? 0.35f
+        float intensity = maxVisits <= 1 ? 1.0f
                 : (float) (Math.log1p(visits) / Math.log1p(maxVisits));
-        float hue = 0.62f * (1.0f - Math.min(1.0f, intensity));
+        float hue = 0.10f + 0.48f * (1.0f - Math.min(1.0f, intensity));
         int rgb = java.awt.Color.HSBtoRGB(hue, 0.9f, 1.0f);
         double age = Math.max(0, now - lastVisit);
-        float freshness = lastVisit <= 0 ? 0.5f : (float) Math.max(0.25, 1.0 - age / (7.0 * 86_400_000.0));
+        float freshness = lastVisit <= 0 ? 0.5f : (float) Math.max(0, 1.0 - age / (7.0 * 86_400_000.0));
         int alpha = Math.round((55 + 160 * intensity) * freshness);
         return (alpha << 24) | (rgb & 0x00FFFFFF);
     }

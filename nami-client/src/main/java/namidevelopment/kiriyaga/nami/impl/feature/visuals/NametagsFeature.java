@@ -19,6 +19,7 @@ import namidevelopment.kiriyaga.api.model.setting.BoolSetting;
 import namidevelopment.kiriyaga.api.model.setting.DoubleSetting;
 import namidevelopment.kiriyaga.api.util.ColorUtils;
 import namidevelopment.kiriyaga.api.util.entity.EntityUtils;
+import namidevelopment.kiriyaga.nami.impl.util.SaturnicBadge;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -83,7 +84,7 @@ public class NametagsFeature extends Feature {
 
             String ign = ent.getName().getString();
 
-            String text = ign;
+            String text = ign + (ent == MC.player ? " [SAT]" : "");
 
             if (gameMode.get()) {
                 String gm = EntityUtils.getGameMode((Player) ent).getName().toUpperCase();
@@ -121,7 +122,9 @@ public class NametagsFeature extends Feature {
                     colored = colored.replace(" -" + pops, " " + ColorUtils.getTotemColor(pops) + "-" + pops);
             }
 
-            Component display = CAT_FORMAT.format(colored);
+            Component display = ent == MC.player
+                    ? SaturnicBadge.appendTo(CAT_FORMAT.format(colored))
+                    : CAT_FORMAT.format(colored);
             float scale = 1.0f;
 
             if (dynamicScale.get()) {

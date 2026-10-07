@@ -2,6 +2,7 @@ package namidevelopment.kiriyaga.nami.mixin;
 
 import namidevelopment.kiriyaga.api.core.socials.SocialsStatus;
 import namidevelopment.kiriyaga.nami.impl.feature.miscellaneous.BetterTabFeature;
+import namidevelopment.kiriyaga.nami.impl.util.SaturnicBadge;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.PlayerTabOverlay;
@@ -125,6 +126,14 @@ public abstract class MixinPlayerTabOverlay {
         };
 
         info.setReturnValue(decorateName(entry, CAT_FORMAT.format(color + playerName)));
+    }
+
+    @Inject(method = "getNameForDisplay", at = @At("RETURN"), cancellable = true)
+    private void addSaturnicBadge(PlayerInfo entry, CallbackInfoReturnable<Component> info) {
+        if (MC == null || MC.player == null || info.getReturnValue() == null) return;
+        if (!MC.player.getUUID().equals(entry.getProfile().id())) return;
+
+        info.setReturnValue(SaturnicBadge.appendTo(info.getReturnValue()));
     }
 
     @Inject(method = "render", at = @At("HEAD"))
